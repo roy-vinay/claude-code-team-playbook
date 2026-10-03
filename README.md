@@ -3,7 +3,7 @@
 **AI made code cheap. Review is now the scarce resource.**
 This playbook organizes coding agents around that one constraint.
 
-Companion to the article *More Claude Code Sessions Made Me Ship Less. Here's What Fixed It.* by Vinay Roy.
+Companion to the article [More Claude Code Sessions Made Me Ship Less. Here's What Fixed It.](https://vinayroy.substack.com/p/more-claude-code-sessions-made-me) by Vinay Roy.
 
 ---
 
