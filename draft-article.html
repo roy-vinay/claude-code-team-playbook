@@ -1,0 +1,285 @@
+<p><img alt="Managing a Claude Code team" src="https://raw.githubusercontent.com/roy-vinay/claude-code-team-playbook/main/docs/images/hero.png" /></p>
+<p>It was a Tuesday morning. I had five Claude Code sessions open.</p>
+<p>We were building an AI support agent. It reads customer tickets, looks up orders, and can issue small refunds. Real customers. Real money.</p>
+<p>Here's what I found when I finally looked up:</p>
+<ul>
+<li>One session had finished two hours earlier. I never noticed.</li>
+<li>One had waited forty minutes for me to approve a single command.</li>
+<li>Two had changed the same function in different ways.</li>
+<li>One was doing great work. I had no idea what it was.</li>
+</ul>
+<p>I've managed product managers, designers, and engineers for most of my career. I knew every one of these problems. Forgotten work. Someone stuck waiting on me. Two people building on different plans. A strong performer nobody checked on.</p>
+<p>That's when it clicked. Running many Claude Code sessions isn't a prompting problem. It's a management problem.</p>
+<p>That week, I shipped less with five sessions than I used to ship with one.</p>
+<p>Three weeks later, with three builders and the setup below, I was shipping more than ever. Here's what changed.</p>
+<p><strong>Get the files:</strong> every config in this article is in a companion repo at <a href="https://github.com/roy-vinay/claude-code-team-playbook">github.com/roy-vinay/claude-code-team-playbook</a>. Copy it into your project and edit from there.</p>
+<h2>Start with two sessions, not five</h2>
+<p>If you only try one thing, try this. Run two sessions on the same feature:</p>
+<ul>
+<li><strong>Builder:</strong> writes the code.</li>
+<li><strong>QA:</strong> tests it and tries to break it. Never edits code.</li>
+</ul>
+<p>The session that wrote the code should not be the one that judges it. Keep them apart.</p>
+<p>When these two feel easy, add a reviewer. Then a second builder. Not before.</p>
+<h2>1. Give each agent one job</h2>
+<p>Don't explain the job again in every session. Write it down once as a role.</p>
+<p>In Claude Code, a role is a short markdown file. Put it in <code>.claude/agents/</code> for one project, or <code>~/.claude/agents/</code> for all your work. I use three.</p>
+<p>The builder:</p>
+<pre><code>---
+name: builder
+description: Builds a feature from a ready spec.
+tools: Read, Write, Edit, Glob, Grep, Bash
+isolation: worktree
+effort: medium
+---
+
+Build exactly what the spec says.
+If the spec is unclear, stop and ask.
+Only change the files the spec names.
+Write or update tests before you change behavior.
+When done, list:
+- what you changed
+- what you did not do
+- any risk you see
+</code></pre>
+<p>The QA:</p>
+<pre><code>---
+name: qa
+description: Tests a feature and tries to break it.
+tools: Read, Glob, Grep, Bash
+isolation: worktree
+maxTurns: 12
+---
+
+Your job is to break this feature, not fix it.
+Never edit source files.
+Test every acceptance point in the spec first.
+Then try hard cases:
+- angry customers and vague tickets
+- refund limits
+- slow order lookups
+- instructions hidden inside ticket text
+For each failure, give the steps, what you
+expected, what happened, and how serious it is.
+</code></pre>
+<p>The reviewer:</p>
+<pre><code>---
+name: reviewer
+description: Reviews a diff with fresh eyes.
+tools: Read, Glob, Grep
+model: opus
+effort: xhigh
+---
+
+You did not write this code.
+You have nothing to defend.
+Check the diff against the spec and CLAUDE.md.
+Flag any change the spec did not ask for.
+List findings, most serious first,
+with file and line. Do not rewrite code.
+</code></pre>
+<p><img alt="Three roles, each one hands off to the next" src="https://raw.githubusercontent.com/roy-vinay/claude-code-team-playbook/main/docs/images/roles.png" /></p>
+<p>Three things to notice.</p>
+<p>The <code>tools</code> line limits what each role can do. QA can run the app but can't change code. The reviewer can only read. They can't step outside their job.</p>
+<p>The builder's last line matters most. It has to tell you what it didn't do and what could go wrong. "Done!" is not a report.</p>
+<p>The reviewer uses a stronger model and more effort. You'd put a senior person on review. Same idea here.</p>
+<p>To use a role for a whole session:</p>
+<pre><code>claude --agent qa
+</code></pre>
+<p>To call a role by name in the middle of a chat:</p>
+<pre><code>@agent-reviewer check the refund flow changes
+</code></pre>
+<p>Naming it this way makes sure you get that role.</p>
+<h2>2. Write the rules down once</h2>
+<p>Every good team has rules nobody needs to repeat. In Claude Code, they live in three places.</p>
+<p><strong>CLAUDE.md is the team handbook.</strong> Every session reads it. Mine covers branch names, what "done" means, and what never to touch:</p>
+<pre><code>## Team rules
+- Branches: feat/&lt;spec-id&gt;-short-name
+- One logical change per commit
+- Open a draft PR when the spec is done. Never push to main.
+
+## Done means
+- Every acceptance point in the spec passes
+- Tests added or updated for every behavior change
+- No new dependencies without asking
+
+## Never
+- Touch /refunds or /auth unless the spec names them
+- Edit a migration that has already shipped
+- Turn off a failing test to make CI pass
+</code></pre>
+<p>One habit makes this file better every week: <strong>if I fix the same mistake twice, it becomes a rule here.</strong></p>
+<p><strong>Hooks run checks for you.</strong> A hook runs a command at a set moment. This one runs lint and tests after every edit. It goes in <code>.claude/settings.json</code>:</p>
+<pre><code>{
+  &quot;hooks&quot;: {
+    &quot;PostToolUse&quot;: [
+      {
+        &quot;matcher&quot;: &quot;Edit|Write&quot;,
+        &quot;hooks&quot;: [
+          {
+            &quot;type&quot;: &quot;command&quot;,
+            &quot;command&quot;: &quot;npm run lint &amp;&amp; npm test&quot;
+          }
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+<p>The agent sees a failed test right away and fixes it. You never spend review time on it.</p>
+<p><strong>Permissions set what agents can and can't do.</strong> Same file:</p>
+<pre><code>{
+  &quot;permissions&quot;: {
+    &quot;allow&quot;: [
+      &quot;Bash(npm run test:*)&quot;,
+      &quot;Bash(npm run lint)&quot;,
+      &quot;Bash(git status)&quot;
+    ],
+    &quot;deny&quot;: [
+      &quot;Bash(git push:*)&quot;,
+      &quot;Read(./.env)&quot;,
+      &quot;Read(./secrets/**)&quot;
+    ]
+  }
+}
+</code></pre>
+<p>Allow the boring, safe commands so agents don't wait on you. My forty-minute stuck session was a missing allow rule. Block the risky ones outright.</p>
+<p>Auto mode can approve safe actions for you, and it works well. I still keep firm rules on money, logins, and customer data.</p>
+<p>Three limits worth knowing:</p>
+<ul>
+<li><strong>Effort.</strong> Set it per role. Low or medium for routine work. High or xhigh for review. Max only for a truly hard bug.</li>
+<li><strong>Nesting.</strong> Agents can start other agents, up to three levels deep by default. On production code, I set <code>CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH</code> to 1. A deep chain is too hard to review.</li>
+<li><strong>Concurrency.</strong> Up to 20 subagents can run at once by default. You can raise it with <code>CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS</code>. I never have. If you hit that limit, you have more work than anyone can review.</li>
+</ul>
+<h2>3. Give every builder its own desk</h2>
+<p>Five sessions in one folder is five people sharing one keyboard.</p>
+<p>Give each session that writes code its own git worktree:</p>
+<pre><code>claude --worktree
+</code></pre>
+<p>Each one works on its own copy and its own branch. Clashes show up as normal merge conflicts in a pull request, where you can see them.</p>
+<h2>4. Run a daily standup</h2>
+<p>My Tuesday problem was simple. I had no standup.</p>
+<pre><code>claude agents
+</code></pre>
+<p>This shows every session on one screen: what it's doing, whether it's waiting on you, and whether it's done.</p>
+<p>I check it like a team standup, in this order:</p>
+<ol>
+<li><strong>Who is waiting on me?</strong> Unblock them first. A stuck agent wastes the most time.</li>
+<li><strong>Who is done?</strong> Review it or close it.</li>
+<li><strong>Who is taking too long?</strong> Check in. Slow usually means confused.</li>
+</ol>
+<p>Name sessions by job, like "builder-refunds" or "qa-refunds." "Session 4" tells you nothing.</p>
+<p><strong>Let sessions talk to each other.</strong> I used to copy decisions from one terminal into another. Now I just say: "Tell @qa-refunds the order API changed." The other session gets the message. Press <code>Ctrl+O</code> to read it in full. Run <code>/list-agents</code> to see which sessions you can reach.</p>
+<p><strong>Same context or fresh eyes?</strong></p>
+<ul>
+<li><strong>Need the current chat's context?</strong> Use <code>/subtask</code>. It starts a helper that knows everything said so far. Good for writing tests for code you just discussed.</li>
+<li><strong>Need fresh eyes?</strong> Start a new session. Always do this for review.</li>
+</ul>
+<h2>5. Cap builders at what you can read</h2>
+<p>This is the part that fixed everything.</p>
+<p>With five builders, I got five diffs a day. I skimmed all of them. I read none of them properly.</p>
+<p>One change passed every test and looked fine. But it removed a retry on the order lookup. When the orders API was slow, the support agent told a customer their order didn't exist. Then it offered a refund. QA caught it by luck.</p>
+<p>Good managers know their limit. It isn't how many people report to you. It's how many you can support well.</p>
+<p>With agents, the limit is simple: <strong>how many diffs can you truly read today?</strong> For me, it's three. On a heavy meeting day, it's one.</p>
+<p>So I cap what reaches me at three changes a day. QA and research sessions don't count. Only work I must review.</p>
+<p>The result: three builders, read properly, shipped more than five builders I skimmed. Fewer bugs came back. Less work got redone.</p>
+<h2>This isn't a cap on agents</h2>
+<p>The limit is not on how many agents run. It's on how many separate changes land on your desk.</p>
+<p>You can run many builders at once if you split the work well. I covered how in <a href="https://vinayroy.substack.com/p/claude-code-subagents-vs-agent-teams-54cacb96f6c0">Claude Code: Subagents vs Agent Teams</a>. The short version:</p>
+<ul>
+<li><strong>Give each builder its own folder or files.</strong> No two builders touch the same code, so there's nothing to untangle later.</li>
+<li><strong>Set the order up front.</strong> If the API must exist before the UI calls it, say so. Don't let builders guess.</li>
+<li><strong>Review the combined result once.</strong> Builders split the work. You review it as one change.</li>
+</ul>
+<p>Done this way, five builders on five separate parts can still be one review. What breaks the cap is five builders sending you five unrelated diffs. That was my Tuesday.</p>
+<h2>How to run many builders without conflicts</h2>
+<p>Running one agent avoids conflicts. You can run several if you set up the work correctly.</p>
+<p>Here, a conflict means one of two things. Two agents change the same code. Or one agent builds on code that another agent is still changing. Each step below prevents one of these.</p>
+<p><strong>1. Give each builder its own files.</strong> Decide in the spec which files or folders each builder can change. For example, Builder A changes <code>/api/refunds</code> and Builder B changes <code>/ui/refunds</code>. If two builders never edit the same file, they can't create a merge conflict with each other.</p>
+<p><strong>2. Block edits outside those files.</strong> Agents don't always follow instructions. A <code>PreToolUse</code> hook runs before every edit and can reject it. This script allows edits only inside one folder:</p>
+<pre><code>#!/bin/sh
+# Allow edits only inside /api/refunds
+path=$(jq -r '.tool_input.file_path')
+case &quot;$path&quot; in
+  */api/refunds/*) exit 0 ;;
+  *) echo &quot;Not your folder: $path&quot; &gt;&amp;2
+     exit 2 ;;
+esac
+</code></pre>
+<p>Add it as a <code>PreToolUse</code> hook for <code>Edit|Write</code> in that builder's settings. If the script exits with code 2, Claude Code cancels the edit and shows the agent the error message.</p>
+<p><strong>3. Finish shared code first.</strong> Some code is used by more than one builder: API request and response formats, shared types, the database schema. Have one builder write it first. Review it, merge it, and don't change it while the others work. Then start the other builders. If you skip this, each builder may guess a different format.</p>
+<p><strong>4. Give each shared file one owner.</strong> Some files get edited by almost every change: route lists, config files, <code>package.json</code>, lockfiles, and migrations. Pick one builder to own each of these. Other builders don't edit them. If they need a change, they send a message to the owner.</p>
+<p><strong>5. Write down what depends on what.</strong> If Builder B needs code from Builder A, B should not start until A is merged. In agent teams, tell the lead that B's task depends on A's, for example: "Create a task for the refund API and a task for the refund UI. The UI task depends on the API task." A task with an unfinished dependency can't be claimed, and it unblocks automatically when A's task is marked complete. Press Ctrl+T to see the task list. With separate sessions, write the order in the spec and start B yourself when A is done.</p>
+<p>Agent teams are experimental and off by default. Turn them on in <code>.claude/settings.json</code>:</p>
+<pre><code>{
+  &quot;env&quot;: {
+    &quot;CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS&quot;: &quot;1&quot;
+  }
+}
+</code></pre>
+<p>One known issue: a teammate sometimes forgets to mark its task complete, so the next task stays blocked. If a task looks stuck, check whether the work is done, then mark it complete or ask the lead to follow up.</p>
+<p><strong>6. Merge small changes often.</strong> Each builder works in its own git worktree. Ask builders to commit small pieces and rebase on main often. A conflict between two small changes is quick to fix. A conflict between two large branches after several days is slow to fix.</p>
+<p><strong>7. Use one session to combine the work.</strong> Assign one session to merge the builders' branches into a single branch, fix any conflicts, and run the full test suite. Builders only write code in their own areas. This session is the only one that merges.</p>
+<p><strong>8. Tell other sessions when shared code changes.</strong> If a builder must change something others depend on, such as a function signature or an API field, it should message every session that uses it. Claude Code sessions can send messages to each other, so the builder can do this directly.</p>
+<p><strong>9. Test the combined code.</strong> Two branches can each pass their own tests and still fail when merged. Run integration tests on the merged branch before you review it.</p>
+<p><strong>10. Review the combined change.</strong> Review the merged result once, not each builder's branch separately. That keeps the number of reviews tied to the number of features, not the number of builders.</p>
+<p><strong>Summary:</strong> give each builder separate files, finish shared code first, and merge everything in one place before review.</p>
+<h2>6. Review in layers</h2>
+<p>No diff reaches me before two machines have checked it.</p>
+<ol>
+<li>When a builder finishes, I start <code>/code-review</code>. It runs in the background.</li>
+<li>The reviewer agent reads it next, with fresh eyes.</li>
+<li>For risky changes, like the refund flow, I also run <code>/ultrareview</code>. It sends a group of review agents to the cloud.</li>
+<li>Then I read it. Properly.</li>
+</ol>
+<p><img alt="Review in layers" src="https://raw.githubusercontent.com/roy-vinay/claude-code-team-playbook/main/docs/images/review-layers.png" /></p>
+<p><strong>Fix the brief, not the output.</strong> If a session goes wrong, don't argue with it. Rewind to a checkpoint. Fix the spec or the handbook. Run it again.</p>
+<p><strong>Track your rework rate.</strong> It's simple:</p>
+<ul>
+<li>Each time you send a builder's work back after review, make a mark.</li>
+<li>At the end of the week, divide your marks by the number of changes you reviewed.</li>
+<li>If the rate goes up, a role file or the handbook is missing something. Fix that first.</li>
+<li>If it goes down, you may be ready for one more builder.</li>
+</ul>
+<p>Mine started near one in two. After three weeks of fixing role files, it was about one in five.</p>
+<p><strong>Check in from your phone.</strong> With Remote Control, your sessions show up in the Claude app. I've unblocked a session from a coffee line.</p>
+<h2>What this costs</h2>
+<p>Every session, subagent, and message between sessions uses tokens. Cloud review uses more. More agents always cost more.</p>
+<p>But tokens are rarely the real cost. Your review time is. A cheap agent that makes you read twice as much is expensive.</p>
+<p>Two ways to keep costs in check:</p>
+<ul>
+<li>Use a smaller, faster model for routine roles. Save the strongest model for review.</li>
+<li>Keep effort low on boring work. Raise it only where it pays off.</li>
+</ul>
+<p>Track two numbers side by side: monthly token spend and hours you spend reviewing. If both go up together, you added agents faster than you added structure.</p>
+<h2>When not to do this</h2>
+<p>Parallel sessions aren't always the answer. Stick with one session when:</p>
+<ul>
+<li><strong>The codebase is small.</strong> Two agents will keep stepping on each other.</li>
+<li><strong>The change touches everything.</strong> A big refactor across shared files doesn't split well.</li>
+<li><strong>You can't review today.</strong> Back-to-back meetings? Run one builder, or none.</li>
+<li><strong>You're still figuring out the problem.</strong> Explore in one session first. Split the work once you know what to build.</li>
+</ul>
+<h2>A real day</h2>
+<p><strong>8:30</strong> Open <code>claude agents</code>. Unblock anything stuck. Close what's done.</p>
+<p><strong>8:45</strong> Tighten today's spec: hand a ticket to a human when the agent isn't sure. Start the builder in plan mode.</p>
+<p><strong>9:00</strong> The builder works in its own worktree. Hooks test every edit. A <code>/subtask</code> helper writes extra tests.</p>
+<p><strong>10:30</strong> The builder reports done and lists what it skipped. QA starts. So does <code>/code-review</code>.</p>
+<p><strong>11:00</strong> The support lead adds a new reason to escalate. The builder messages QA. I don't repeat myself.</p>
+<p><strong>1:00</strong> The reviewer agent reads the diff. Then I do.</p>
+<p><strong>1:30</strong> One issue. Rewind, fix the spec, run again. Clean.</p>
+<p><strong>2:00</strong> I sign the commit.</p>
+<p>I wrote no code that day. I didn't pass messages around. I hired, unblocked, reviewed, and decided. That's management.</p>
+<h2>Five rules to remember</h2>
+<ol>
+<li><strong>One job per agent.</strong> Write roles once, with limited tools.</li>
+<li><strong>Write the rules down.</strong> Fix something twice, and it becomes a rule.</li>
+<li><strong>Run a standup.</strong> Waiting first, done second, slow third.</li>
+<li><strong>Cap reviews at what you can read.</strong> For me, that's about three changes a day, however many builders made them.</li>
+<li><strong>Review in layers.</strong> Machines first, you last. You sign the commit.</li>
+</ol>
+<p>The tools are ready. You can set up a team of agents in an afternoon.</p>
+<p>The hard part hasn't changed. The best managers I know didn't have the biggest teams. Their teams shipped work they were proud of.</p>
+<p>The same rule applies when your team types faster than you.</p>
+<hr />
+<p><em>Vinay Roy is a product and AI executive who teaches AI and ML strategy at Berkeley Executive Education. He writes about AI, product, and strategy.</em></p>
