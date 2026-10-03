@@ -47,8 +47,8 @@ This repo is the workflow I ended up with. It is small on purpose.
                             └──→ log it
 
   ╔═══════════════════════════════════════╗
-  ║  Changes you review ≤ what you can    ║
-  ║  truly read today                     ║
+  ║  Review units ≤ what you can truly    ║
+  ║  read today                           ║
   ╚═══════════════════════════════════════╝
 ```
 
@@ -56,7 +56,7 @@ Four rules, and nothing else:
 
 1. **One spec.** Nothing starts without a one-page spec.
 2. **Three roles.** Builder, QA, Reviewer. Each does one job.
-3. **One limit.** Never let more changes reach you than you can properly read today.
+3. **One limit.** Cap review units, not agents. A review unit is one coherent change you can understand, check, and own as a whole.
 4. **One metric.** Measure shipped work and rework, not code generated.
 
 ## Why the roles are separate
@@ -94,7 +94,7 @@ They mostly raised the number of diffs waiting for a proper read.
 **This is not a cap on agents.** It's a cap on separate changes that reach you.
 Many builders can work at once if each owns its own files, the order is set up front,
 and the combined result is reviewed as one change.
-More on that setup: [Claude Code: Subagents vs Agent Teams](https://vinayroy.substack.com/p/claude-code-subagents-vs-agent-teams-54cacb96f6c0).
+See [docs/parallel-builders.md](docs/parallel-builders.md) for ten tactics, and [Claude Code: Subagents vs Agent Teams](https://vinayroy.substack.com/p/claude-code-subagents-vs-agent-teams-54cacb96f6c0) for how to split the work.
 
 ## Does it work?
 
@@ -140,6 +140,9 @@ This playbook adds neither unless it earns its place.
 | `.claude/settings.json` | Permissions, a test hook, and a nesting limit |
 | `specs/TEMPLATE.md` | The one-page spec every feature starts from |
 | `rework-log.md` | Weekly tracking of shipped work and rework |
+| `docs/parallel-builders.md` | Ten tactics for many builders without conflicts |
+| `docs/setup-notes.md` | Limits, messaging, cost, and when to stick with one session |
+| `scripts/check-owner.sh` | Hook that blocks edits outside a builder's folder |
 
 ## How to use it
 
