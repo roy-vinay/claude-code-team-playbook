@@ -47,7 +47,8 @@ This repo is the workflow I ended up with. It is small on purpose.
                             └──→ log it
 
   ╔═══════════════════════════════════════╗
-  ║  Builders ≤ diffs you can truly read  ║
+  ║  Changes you review ≤ what you can   ║
+  ║  truly read today                     ║
   ╚═══════════════════════════════════════╝
 ```
 
