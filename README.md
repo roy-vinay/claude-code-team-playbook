@@ -32,8 +32,9 @@ This repo is the workflow I ended up with. It is small on purpose.
             ┌────────┴────────┐
             ▼                 ▼
            QA             REVIEWER
-      tries to break     fresh eyes,
-      cannot edit code    read only
+        behavior            code
+    "Does it work?"    "Is it sound?"
+     cannot edit        read only
             │                 │
             └────────┬────────┘
                      ▼
@@ -59,6 +60,11 @@ Four rules, and nothing else:
 
 ## Why the roles are separate
 
+**What's the difference between QA and Reviewer?**
+QA checks behavior: does it work, and can I break it?
+The reviewer checks the code: is it correct, safe, and easy to maintain?
+A change needs both before it reaches you.
+
 **Why can't QA edit code?**
 If QA can fix what it tests, it becomes a second builder.
 Its goal quietly shifts from "find what's broken" to "make my version pass."
@@ -77,24 +83,23 @@ A list of what was not done, and what could go wrong, tells you where to look fi
 
 Your review capacity sets your team size. Not your token budget.
 
-For most people, that's two or three builders a day.
-On a heavy meeting day, one.
+For me, that has usually meant two or three builders on a focused day,
+and one on a meeting-heavy day.
 QA and research sessions don't count. Only sessions that make code you must review.
 
-More builders than that does not raise output.
-It raises the number of diffs nobody reads properly.
+Beyond that point, I found that more builders stopped raising what I shipped.
+They mostly raised the number of diffs waiting for a proper read.
 
 ## Does it work?
 
 This section will hold real observations, not lab results.
 I'm tracking the same workflow before and after the change, using `rework-log.md`.
 
-| Period | Builders | Changes shipped | Sent back | Review hours |
-|--------|----------|-----------------|-----------|--------------|
-| Before | —        | —               | —         | —            |
-| After  | —        | —               | —         | —            |
+| Week | Builders/day | Changes shipped | Sent back | Review hours | Rework rate |
+|------|--------------|-----------------|-----------|--------------|-------------|
+| W1   |              |                 |           |              |             |
 
-Numbers will be added as they come in. They are operational notes from one person's work, not a controlled study.
+Numbers will be added week by week, good or bad. They are operational notes from one person's work, not a controlled study.
 
 ## What about Claude Code agent teams?
 
@@ -112,8 +117,9 @@ The constraint stays the same either way:
 Other Claude Code playbooks add more agents, skills, and workflows.
 This one doesn't, by design.
 
-More moving parts mean more output to review.
-That is the exact problem this repo exists to solve.
+More builders create more output to review.
+More roles and workflows create more coordination.
+This playbook adds neither unless it earns its place.
 
 ---
 
