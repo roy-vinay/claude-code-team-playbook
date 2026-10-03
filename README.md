@@ -96,18 +96,24 @@ I'm tracking the same workflow before and after the change, using `rework-log.md
 
 Numbers will be added as they come in. They are operational notes from one person's work, not a controlled study.
 
-## Why not Claude Code agent teams?
+## What about Claude Code agent teams?
 
-Claude Code has an experimental agent teams feature, where a lead session coordinates teammates.
-It's a good fit when you want the agents to organize themselves.
+This playbook is an operating model, not an orchestration tool.
+It works whether you run separate sessions by hand or use Claude Code's agent teams.
 
-This playbook makes a different trade:
+The tool decides how agents run.
+This playbook decides how many should run, and who checks their work.
 
-- **Separate sessions, not one coordinated team.** Each role has its own context, so the reviewer stays truly independent.
-- **Explicit human gates.** A person reads every diff before merge.
-- **A hard work-in-progress limit.** The number of builders is set by your review capacity, not by what the tool can run.
+The constraint stays the same either way:
+**don't generate work faster than you can verify it.**
 
-Use agent teams for speed. Use this when review quality is the thing you can't afford to lose.
+## Small on purpose
+
+Other Claude Code playbooks add more agents, skills, and workflows.
+This one doesn't, by design.
+
+More moving parts mean more output to review.
+That is the exact problem this repo exists to solve.
 
 ---
 
