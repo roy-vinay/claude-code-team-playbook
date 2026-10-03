@@ -55,7 +55,7 @@ Four rules, and nothing else:
 
 1. **One spec.** Nothing starts without a one-page spec.
 2. **Three roles.** Builder, QA, Reviewer. Each does one job.
-3. **One limit.** Never run more builders than the diffs you can properly read today.
+3. **One limit.** Never let more changes reach you than you can properly read today.
 4. **One metric.** Measure shipped work and rework, not code generated.
 
 ## Why the roles are separate
@@ -89,6 +89,11 @@ QA and research sessions don't count. Only sessions that make code you must revi
 
 Beyond that point, I found that more builders stopped raising what I shipped.
 They mostly raised the number of diffs waiting for a proper read.
+
+**This is not a cap on agents.** It's a cap on separate changes that reach you.
+Many builders can work at once if each owns its own files, the order is set up front,
+and the combined result is reviewed as one change.
+More on that setup: [Claude Code: Subagents vs Agent Teams](https://vinayroy.substack.com/p/claude-code-subagents-vs-agent-teams-54cacb96f6c0).
 
 ## Does it work?
 
