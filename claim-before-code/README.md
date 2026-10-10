@@ -149,3 +149,7 @@ cd claim-before-code
 python3 -m unittest discover -s tests
 ./demo.sh
 ```
+
+## License
+
+MIT. See [LICENSE](../LICENSE).
