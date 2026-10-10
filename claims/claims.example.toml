@@ -1,0 +1,28 @@
+# Copy to .claims.toml at the root of your repo.
+
+# Who settles ownership disagreements and unanswered requests.
+coordinator = "@tech-lead"
+
+# Requests nobody answers within this window escalate to the coordinator.
+response_window_minutes = 60
+
+# Accepted claims expire unless renewed, so abandoned work never blocks anyone for long.
+lease_minutes = 240
+
+# Busy shared files where agents claim single functions instead of the whole file.
+# A whole-file claim on one of these goes to the coordinator for approval.
+hot_files = [
+  "src/pricing/calculate.py",
+  "src/models/order.py",
+]
+
+# Paths any session may edit without a claim.
+always_allowed = ["specs/", "rework-log.md", ".claims/"]
+
+# How to read the ticket id from a branch name like feat/PRM-207-promo-codes.
+ticket_pattern = '(?:^|/)([A-Z][A-Z0-9]+-\d+)'
+
+# CODEOWNERS teams, so a request to @shop/checkout reaches its members.
+[teams]
+"@shop/checkout" = ["@dana"]
+"@shop/promotions" = ["@lee"]

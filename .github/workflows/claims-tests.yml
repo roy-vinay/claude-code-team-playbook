@@ -1,0 +1,23 @@
+name: claims tests
+
+on:
+  push:
+    paths: ["claims/**"]
+  pull_request:
+    paths: ["claims/**"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: |
+          git config --global user.email ci@example.com
+          git config --global user.name CI
+          cd claims && python -m unittest discover -s tests && ./demo.sh
