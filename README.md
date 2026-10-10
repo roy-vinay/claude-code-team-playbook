@@ -112,6 +112,8 @@ Numbers will be added week by week, good or bad. They are operational notes from
 `check-owner.sh` works when one person splits the work. It doesn't help when each developer
 runs their own agents on their own tickets, and those agents reach into the same shared code.
 
+![claims demo: two agents, one shared file](claims/docs/claims-demo.gif)
+
 For that, see [`claims/`](claims/README.md): before an agent edits anything, it claims the folders,
 files, or hot-file functions it will change. Overlaps and code owned by someone else go to that
 owner as a request, not to a merge conflict. A hook blocks unclaimed edits, and a pull request

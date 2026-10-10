@@ -5,6 +5,10 @@ A small claims registry for teams whose coding agents keep building in each othe
 Companion to the article [When Your Team's Coding Agents Start Stepping on Each Other](https://vinayroy.substack.com/p/when-your-teams-coding-agents-start).
 It is a reference implementation of the workflow in that article, kept small enough to read in one sitting.
 
+![Two agents share one pricing file. Lee's agent is blocked from editing Dana's function, asks her, and builds against her answer instead of a second version.](docs/claims-demo.gif)
+
+<sub>A replay of <code>demo.sh</code>. The command output is from a real run; regenerate it with <code>docs/make_demo_gif.py</code> (needs Pillow).</sub>
+
 ---
 
 ## The problem it solves
