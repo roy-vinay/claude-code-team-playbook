@@ -1,0 +1,23 @@
+name: claim-before-code tests
+
+on:
+  push:
+    paths: ["claim-before-code/**"]
+  pull_request:
+    paths: ["claim-before-code/**"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: |
+          git config --global user.email ci@example.com
+          git config --global user.name CI
+          cd claim-before-code && python -m unittest discover -s tests && ./demo.sh

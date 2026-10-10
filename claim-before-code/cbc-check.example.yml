@@ -1,0 +1,32 @@
+# Copy to .github/workflows/cbc-check.yml
+# Fails a pull request that changes code outside its ticket's accepted claim.
+name: claim-before-code check
+
+on:
+  pull_request:
+
+jobs:
+  claim-before-code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compare the diff with the claim
+        env:
+          BRANCH: ${{ github.head_ref }}
+          BASE: origin/${{ github.base_ref }}
+        run: |
+          TICKET=$(echo "$BRANCH" | grep -oE '[A-Z][A-Z0-9]+-[0-9]+' | head -1)
+          if [ -z "$TICKET" ]; then
+            echo "No ticket id in branch name $BRANCH; skipping."
+            exit 0
+          fi
+          if [ ! -f ".claims/$TICKET.json" ]; then
+            echo "Missing .claims/$TICKET.json. Run: claim-before-code/cbc export --ticket $TICKET -o .claims/$TICKET.json"
+            exit 1
+          fi
+          python3 claim-before-code/cbc check-diff --base "$BASE" --manifest ".claims/$TICKET.json"

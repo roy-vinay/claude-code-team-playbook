@@ -9,7 +9,7 @@ For how to split the work, see [Claude Code: Subagents vs Agent Teams](https://v
 ## Ten tactics, most useful first
 
 1. **Split by ownership.** Give each builder its own folders or files, and write it in the spec. Nobody touches another builder's files.
-2. **Enforce it, don't just ask.** Prompts drift. Use [`scripts/check-owner.sh`](../scripts/check-owner.sh) as a `PreToolUse` hook on `Edit|Write`. Exit code 2 stops the edit and tells the agent why.
+2. **Enforce it, don't just ask.** Prompts drift. Use [`scripts/check-owner.sh`](../scripts/check-owner.sh) as a `PreToolUse` hook on `Edit|Write`. Exit code 2 stops the edit and tells the agent why. When builders belong to different developers, use [`claim-before-code/`](../claim-before-code/README.md) instead, so ownership is checked across everyone's sessions.
 3. **Lock the contract first.** One builder writes the shared parts first: API shapes, types, the database schema. Review and freeze them. Then build in parallel.
 4. **Give busy files one owner.** Routes, config, `package.json`, lockfiles, migrations. One owner each. Everyone else asks that owner for changes.
 5. **Set the order up front.** If B depends on A, say so. Agent teams support task dependencies. With separate sessions, write the order into the spec.
