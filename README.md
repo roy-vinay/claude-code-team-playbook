@@ -169,3 +169,7 @@ This playbook adds neither unless it earns its place.
 
 - Commands and settings follow the [Claude Code docs](https://code.claude.com/docs) at the time of writing. Check there if something doesn't work.
 - The hook assumes `npm`. Swap in your own lint and test commands.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
