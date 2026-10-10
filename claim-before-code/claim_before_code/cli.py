@@ -1,4 +1,4 @@
-"""Command line: `claims <command>`. Run `claims -h` for the list."""
+"""Command line: `cbc <command>`. Run `cbc -h` for the list."""
 
 from __future__ import annotations
 
@@ -15,14 +15,14 @@ from .registry import ClaimError, Registry
 def _ticket(cfg: Config, args) -> str:
     t = getattr(args, "ticket", None) or current_ticket(cfg)
     if not t:
-        raise ClaimError("no ticket: pass --ticket, set CLAIMS_TICKET, or use a feat/<TICKET>-name branch")
+        raise ClaimError("no ticket: pass --ticket, set CBC_TICKET, or use a feat/<TICKET>-name branch")
     return t
 
 
 def _handle(cfg: Config, args) -> str:
     h = current_handle(getattr(args, "as_handle", None), cfg.root)
     if not h:
-        raise ClaimError("who are you? pass --as @handle, set CLAIMS_HANDLE, or run: git config claims.handle @you")
+        raise ClaimError("who are you? pass --as @handle, set CBC_HANDLE, or run: git config cbc.handle @you")
     return h
 
 
@@ -52,7 +52,7 @@ def _print_status(rows: list[dict]) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="claims", description="Claim code before your agent edits it.")
+    ap = argparse.ArgumentParser(prog="cbc", description="Claim Before Code: claim shared code before your agent edits it.")
     ap.add_argument("--json", action="store_true", help="machine-readable output")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
@@ -90,7 +90,7 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("check-diff", help="fail if the branch changed code outside its claim")
     s.add_argument("--ticket")
     s.add_argument("--base", default="origin/main")
-    s.add_argument("--manifest", help="claim manifest from `claims export` (for CI)")
+    s.add_argument("--manifest", help="claim manifest from `cbc export` (for CI)")
 
     args = ap.parse_args(argv)
 
@@ -117,7 +117,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"{ticket} changed code outside its accepted claim:")
                 for line in problems:
                     print(f"  {line}")
-                print("Amend the claim (claims propose ...) or move these changes to the right ticket.")
+                print("Amend the claim (cbc propose ...) or move these changes to the right ticket.")
             else:
                 print(f"{ticket}: every change is inside the accepted claim.")
             return 1 if problems else 0
@@ -145,7 +145,7 @@ def main(argv: list[str] | None = None) -> int:
                     print(f"request #{r['id']}{esc}  {r['ticket']} ({r['from']}): {r['detail']}")
                     if r["reason"]:
                         print(f"    why: {r['reason']}")
-                    print(f"    answer: claims grant {r['id']}  |  claims decline {r['id']} --note \"...\"")
+                    print(f"    answer: cbc grant {r['id']}  |  cbc decline {r['id']} --note \"...\"")
                 return 0
         elif args.cmd in ("grant", "decline"):
             out = reg.resolve(args.request, _handle(cfg, args), args.cmd == "grant", args.note)
@@ -178,7 +178,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(out, indent=2, default=str))
         return 0
     except (ClaimError, ValueError, RuntimeError) as e:
-        print(f"claims: {e}", file=sys.stderr)
+        print(f"cbc: {e}", file=sys.stderr)
         return 1
 
 

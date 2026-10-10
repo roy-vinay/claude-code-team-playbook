@@ -1,12 +1,12 @@
-# Copy to .github/workflows/claims-check.yml
+# Copy to .github/workflows/cbc-check.yml
 # Fails a pull request that changes code outside its ticket's accepted claim.
-name: claims check
+name: claim-before-code check
 
 on:
   pull_request:
 
 jobs:
-  claims:
+  claim-before-code:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +26,7 @@ jobs:
             exit 0
           fi
           if [ ! -f ".claims/$TICKET.json" ]; then
-            echo "Missing .claims/$TICKET.json. Run: claims/claims export --ticket $TICKET -o .claims/$TICKET.json"
+            echo "Missing .claims/$TICKET.json. Run: claim-before-code/cbc export --ticket $TICKET -o .claims/$TICKET.json"
             exit 1
           fi
-          python3 claims/claims check-diff --base "$BASE" --manifest ".claims/$TICKET.json"
+          python3 claim-before-code/cbc check-diff --base "$BASE" --manifest ".claims/$TICKET.json"

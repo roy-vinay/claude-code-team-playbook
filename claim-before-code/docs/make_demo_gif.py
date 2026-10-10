@@ -1,10 +1,10 @@
-"""Render docs/claims-demo.gif: a split-screen replay of demo.sh.
+"""Render docs/cbc-demo.gif: a split-screen replay of demo.sh.
 
 The command output shown is copied from a real run of ./demo.sh. Only the
-regeneration of this GIF needs Pillow (pip install pillow); claims itself
+regeneration of this GIF needs Pillow (pip install pillow); Claim Before Code itself
 has no dependencies.
 
-    python3 claims/docs/make_demo_gif.py
+    python3 claim-before-code/docs/make_demo_gif.py
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-OUT = Path(__file__).with_name("claims-demo.gif")
+OUT = Path(__file__).with_name("cbc-demo.gif")
 W, H = 1200, 720
 MONO = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
 MONO_B = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
@@ -62,10 +62,10 @@ def draw(st: State, typing: tuple[str, str] | None = None) -> Image.Image:
     d = ImageDraw.Draw(im)
 
     # Header
-    d.text((24, 20), "claims", font=f_title, fill=C["text"])
-    d.text((24 + f_title.getlength("claims  "), 23), "two agents, one shared file",
+    d.text((24, 20), "Claim Before Code", font=f_title, fill=C["text"])
+    d.text((24 + f_title.getlength("Claim Before Code  "), 23), "two agents, one shared file",
            font=f_label, fill=C["dim"])
-    tag = "replay of claims/demo.sh"
+    tag = "replay of claim-before-code/demo.sh"
     d.text((W - 24 - f_small.getlength(tag), 25), tag, font=f_small, fill=C["dim"])
 
     # Agent panes
@@ -172,14 +172,14 @@ def build():
     snap(1800)
 
     st.caption = "Dana's agent claims the one function it will change."
-    type_cmd("dana", "claims propose src/pricing/calculate.py::calculate_total")
+    type_cmd("dana", "cbc propose src/pricing/calculate.py::calculate_total")
     out("dana", "#1 ACCEPTED: Accepted. You may edit these targets.", "green", True)
     st.rows.append({"target": "calculate.py::calculate_total", "holder": "CHK-412 @dana",
                     "status": "ACCEPTED", "color": "green"})
     snap(1900)
 
     st.caption = "Lee's agent claims a different function in the same file. No overlap, so it's accepted."
-    type_cmd("lee", "claims propose src/pricing/calculate.py::apply_discount src/promotions/")
+    type_cmd("lee", "cbc propose src/pricing/calculate.py::apply_discount src/promotions/")
     out("lee", "#2 ACCEPTED: Accepted. You may edit these targets.", "green", True)
     st.rows.append({"target": "calculate.py::apply_discount", "holder": "PRM-207 @lee",
                     "status": "ACCEPTED", "color": "green"})
@@ -194,12 +194,12 @@ def build():
     st.caption = "Then Lee's agent reaches for Dana's function. The hook blocks the edit."
     out("lee", "● Edit calculate.py  (calculate_total)", "dim", hold=800)
     out("lee", "✗ No accepted claim for src/pricing/calculate.py::calculate_total "
-               "on PRM-207. Run: claims propose ... and wait.", "red", True, indent="  ")
+               "on PRM-207. Run: cbc propose ... and wait.", "red", True, indent="  ")
     st.rows[0]["hl"] = True
     snap(2600)
 
     st.caption = "So it asks. The request goes to Dana, not to a merge conflict."
-    type_cmd("lee", 'claims propose src/pricing/calculate.py::calculate_total '
+    type_cmd("lee", 'cbc propose src/pricing/calculate.py::calculate_total '
                     '--reason "store applied promo codes on the total"')
     out("lee", "#3 PENDING: Paused. Do not edit these targets yet. Request sent to @dana.",
         "amber", True, indent="  ")
@@ -209,14 +209,14 @@ def build():
     snap(2400)
 
     st.caption = "Dana sees the request, with the reason, in her inbox."
-    type_cmd("dana", "claims inbox")
+    type_cmd("dana", "cbc inbox")
     out("dana", "request #1  PRM-207 (@lee): calculate.py::calculate_total "
                 "is already claimed by CHK-412 (accepted).", "amber", indent="  ")
     out("dana", "    why: store applied promo codes on the total", "dim")
     snap(2600)
 
     st.caption = "She answers with what to do instead."
-    type_cmd("dana", 'claims decline 1 --note "I\'ll add a promo_codes argument '
+    type_cmd("dana", 'cbc decline 1 --note "I\'ll add a promo_codes argument '
                      'to calculate_total by 3pm. Build against that."')
     out("dana", "Request #1 declined. Claim #3 is now declined.", "text", True)
     st.rows[3].update(status="DECLINED", color="red", note="note from @dana")
@@ -234,8 +234,8 @@ def build():
     # End card
     card = Image.new("RGB", (W, H), C["bg"])
     cd = ImageDraw.Draw(card)
-    t1 = "claims"
-    t2 = "Claim before you edit. Overlaps go to the owner."
+    t1 = "Claim Before Code"
+    t2 = "No agent writes code until its claim is accepted. Overlaps go to the owner."
     t3 = "github.com/roy-vinay/claude-code-team-playbook"
     cd.text(((W - f_big.getlength(t1)) / 2, 250), t1, font=f_big, fill=C["text"])
     cd.text(((W - f_cap.getlength(t2)) / 2, 320), t2, font=f_cap, fill=C["dim"])

@@ -8,8 +8,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 
-from agentclaims.config import Config  # noqa: E402
-from agentclaims.registry import Registry  # noqa: E402
+from claim_before_code.config import Config  # noqa: E402
+from claim_before_code.registry import Registry  # noqa: E402
 
 CALCULATE = textwrap.dedent('''\
     TAX_RATE = 0.08
@@ -58,7 +58,7 @@ def git(root, *args):
 
 
 def make_repo(config=CONFIG, codeowners=CODEOWNERS):
-    tmp = Path(tempfile.mkdtemp(prefix="claims-test-"))
+    tmp = Path(tempfile.mkdtemp(prefix="cbc-test-"))
     git(tmp, "init", "-q", "-b", "main")
     git(tmp, "config", "user.email", "test@example.com")
     git(tmp, "config", "user.name", "Test")
@@ -70,7 +70,7 @@ def make_repo(config=CONFIG, codeowners=CODEOWNERS):
     (tmp / "src/promotions/codes.py").write_text("CODES = {}\n")
     (tmp / "README.md").write_text("demo\n")
     if config:
-        (tmp / ".claims.toml").write_text(config)
+        (tmp / ".cbc.toml").write_text(config)
     if codeowners:
         (tmp / ".github").mkdir()
         (tmp / ".github/CODEOWNERS").write_text(codeowners)
@@ -80,6 +80,6 @@ def make_repo(config=CONFIG, codeowners=CODEOWNERS):
 
 
 def registry(root, clock=None):
-    os.environ.pop("CLAIMS_DB", None)
+    os.environ.pop("CBC_DB", None)
     cfg = Config.load(root)
     return cfg, Registry(cfg, now=clock or Clock())

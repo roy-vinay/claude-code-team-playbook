@@ -1,10 +1,10 @@
-name: claims tests
+name: claim-before-code tests
 
 on:
   push:
-    paths: ["claims/**"]
+    paths: ["claim-before-code/**"]
   pull_request:
-    paths: ["claims/**"]
+    paths: ["claim-before-code/**"]
 
 jobs:
   test:
@@ -20,4 +20,4 @@ jobs:
       - run: |
           git config --global user.email ci@example.com
           git config --global user.name CI
-          cd claims && python -m unittest discover -s tests && ./demo.sh
+          cd claim-before-code && python -m unittest discover -s tests && ./demo.sh

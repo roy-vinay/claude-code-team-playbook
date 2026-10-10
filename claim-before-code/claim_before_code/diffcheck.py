@@ -1,7 +1,7 @@
 """Pull request check: compare what a branch actually changed with its claim.
 
 Works from the registry when it can, or from a manifest written by
-`claims export`, so it can run in CI where the registry isn't available.
+`cbc export`, so it can run in CI where the registry isn't available.
 """
 
 from __future__ import annotations

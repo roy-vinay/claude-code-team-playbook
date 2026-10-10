@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "claims": {
-      "command": "python3",
-      "args": ["claims/claims", "mcp"],
-      "env": { "CLAIMS_HANDLE": "@your-handle" }
-    }
-  }
-}

@@ -7,15 +7,15 @@ import unittest
 from pathlib import Path
 
 from helpers import Clock, git, make_repo, registry
-from agentclaims.config import Config
-from agentclaims.hook import evaluate
-from agentclaims.mcp_server import Server
-from agentclaims.registry import ClaimError, Registry
-from agentclaims import diffcheck
-from agentclaims.targets import Target
+from claim_before_code.config import Config
+from claim_before_code.hook import evaluate
+from claim_before_code.mcp_server import Server
+from claim_before_code.registry import ClaimError, Registry
+from claim_before_code import diffcheck
+from claim_before_code.targets import Target
 
 CALC = "src/pricing/calculate.py"
-CLI = str(Path(__file__).resolve().parent.parent / "claims")
+CLI = str(Path(__file__).resolve().parent.parent / "cbc")
 
 
 class RegistryTests(unittest.TestCase):
@@ -66,7 +66,7 @@ class RegistryTests(unittest.TestCase):
         # Owners claiming their own code go straight through.
         self.assertEqual(self.reg.propose("CHK-412", "@dana", ["src/checkout/"]).status, "pending")  # overlaps Lee's pending claim
 
-    def test_owner_claims_own_code(self):
+    def test_owner_cbc_own_code(self):
         self.assertEqual(self.reg.propose("CHK-412", "@dana", ["src/checkout/"]).status, "accepted")
 
     def test_hot_file_rules(self):
@@ -121,13 +121,13 @@ class RegistryTests(unittest.TestCase):
 
 
 def _race(root, ticket, owner, q):
-    os.environ.pop("CLAIMS_DB", None)
+    os.environ.pop("CBC_DB", None)
     reg = Registry(Config.load(root))
     q.put(reg.propose(ticket, owner, ["src/pricing/calculate.py::calculate_total"]).status)
 
 
 class ConcurrencyTests(unittest.TestCase):
-    def test_only_one_of_many_simultaneous_claims_wins(self):
+    def test_only_one_of_many_simultaneous_cbc_wins(self):
         root = make_repo()
         Registry(Config.load(root))  # create schema
         q = multiprocessing.Queue()
@@ -145,10 +145,10 @@ class HookTests(unittest.TestCase):
     def setUp(self):
         self.root = make_repo()
         self.cfg, self.reg = registry(self.root)
-        os.environ["CLAIMS_TICKET"] = "PRM-207"
+        os.environ["CBC_TICKET"] = "PRM-207"
 
     def tearDown(self):
-        os.environ.pop("CLAIMS_TICKET", None)
+        os.environ.pop("CBC_TICKET", None)
 
     def run_hook(self, tool, **inp):
         payload = {"tool_name": tool, "tool_input": inp, "cwd": str(self.root)}
@@ -158,7 +158,7 @@ class HookTests(unittest.TestCase):
         f = str(self.root / "src/promotions/codes.py")
         code, msg = self.run_hook("Edit", file_path=f, old_string="{}", new_string="{'X': 1}")
         self.assertEqual(code, 2)
-        self.assertIn("claims propose src/promotions/codes.py", msg)
+        self.assertIn("cbc propose src/promotions/codes.py", msg)
         self.reg.propose("PRM-207", "@lee", ["src/promotions/"])
         self.assertEqual(self.run_hook("Edit", file_path=f, old_string="{}", new_string="{'X': 1}")[0], 0)
         self.assertEqual(self.run_hook("Write", file_path=str(self.root / "src/promotions/new.py"), content="x=1")[0], 0)
@@ -182,13 +182,13 @@ class HookTests(unittest.TestCase):
         self.assertEqual(self.run_hook("Bash", command="ls")[0], 0)
 
     def test_no_ticket_blocks(self):
-        os.environ.pop("CLAIMS_TICKET")
+        os.environ.pop("CBC_TICKET")
         code, msg = self.run_hook("Write", file_path=str(self.root / "src/x.py"), content="")
         self.assertEqual(code, 2)
         self.assertIn("/start", msg)
 
     def test_ticket_from_branch(self):
-        os.environ.pop("CLAIMS_TICKET")
+        os.environ.pop("CBC_TICKET")
         git(self.root, "checkout", "-qb", "feat/PRM-207-promo-codes")
         self.reg.propose("PRM-207", "@lee", ["src/promotions/"])
         self.assertEqual(self.run_hook("Write", file_path=str(self.root / "src/promotions/a.py"), content="")[0], 0)
@@ -226,29 +226,29 @@ class McpTests(unittest.TestCase):
         root = make_repo()
         cfg = Config.load(root)
         server = Server(cfg)
-        os.environ["CLAIMS_HANDLE"] = "@lee"
+        os.environ["CBC_HANDLE"] = "@lee"
         try:
             init = server.handle({"jsonrpc": "2.0", "id": 1, "method": "initialize",
                                   "params": {"protocolVersion": "2025-06-18"}})
-            self.assertEqual(init["result"]["serverInfo"]["name"], "claims")
+            self.assertEqual(init["result"]["serverInfo"]["name"], "claim-before-code")
             self.assertIsNone(server.handle({"jsonrpc": "2.0", "method": "notifications/initialized"}))
             tools = server.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})["result"]["tools"]
-            self.assertIn("claims_propose", [t["name"] for t in tools])
+            self.assertIn("cbc_propose", [t["name"] for t in tools])
             res = server.handle({"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {
-                "name": "claims_propose", "arguments": {"ticket": "PRM-207", "targets": ["src/promotions/"]}}})
+                "name": "cbc_propose", "arguments": {"ticket": "PRM-207", "targets": ["src/promotions/"]}}})
             self.assertEqual(json.loads(res["result"]["content"][0]["text"])["status"], "accepted")
             bad = server.handle({"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {
-                "name": "claims_propose", "arguments": {"ticket": "PRM-207", "targets": ["src/checkout/cart.py::x"]}}})
+                "name": "cbc_propose", "arguments": {"ticket": "PRM-207", "targets": ["src/checkout/cart.py::x"]}}})
             self.assertTrue(bad["result"]["isError"])
         finally:
-            os.environ.pop("CLAIMS_HANDLE", None)
+            os.environ.pop("CBC_HANDLE", None)
 
     def test_stdio_process(self):
         root = make_repo()
         msgs = [
             {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
             {"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {
-                "name": "claims_status", "arguments": {"all": True}}},
+                "name": "cbc_status", "arguments": {"all": True}}},
         ]
         out = subprocess.run([sys.executable, CLI, "mcp"], cwd=root, capture_output=True, text=True,
                              input="\n".join(json.dumps(m) for m in msgs) + "\n")

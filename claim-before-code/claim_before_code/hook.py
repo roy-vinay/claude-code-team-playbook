@@ -68,7 +68,7 @@ def main() -> int:
     try:
         payload = json.load(sys.stdin)
     except json.JSONDecodeError:
-        print("claims hook: could not read hook input", file=sys.stderr)
+        print("cbc hook: could not read hook input", file=sys.stderr)
         return 0
     code, msg = evaluate(payload)
     if msg:

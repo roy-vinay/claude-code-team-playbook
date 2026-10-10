@@ -166,7 +166,7 @@ class Registry:
         if not ticket:
             raise ClaimError("a claim needs a ticket id")
         if not owner:
-            raise ClaimError("a claim needs an owner handle (use --as or CLAIMS_HANDLE)")
+            raise ClaimError("a claim needs an owner handle (use --as or CBC_HANDLE)")
         parsed = sorted({Target.parse(t) for t in targets})
         if not parsed:
             raise ClaimError("a claim needs at least one target")
@@ -174,7 +174,7 @@ class Registry:
             if t.func and not self.cfg.is_hot(t.path):
                 raise ClaimError(
                     f"{t}: function-level claims are only for hot files. "
-                    f"Claim the whole file {t.path} instead, or add it to hot_files in .claims.toml."
+                    f"Claim the whole file {t.path} instead, or add it to hot_files in .cbc.toml."
                 )
 
         with self._write():
@@ -390,7 +390,7 @@ class Registry:
             names = ", ".join(f"{path}::{f}" for f in missing)
             return False, (
                 f"No accepted claim for {names} on {ticket}. "
-                f"Run: claims propose {' '.join(f'{path}::{f}' for f in missing if f != '<module>') or path} "
+                f"Run: cbc propose {' '.join(f'{path}::{f}' for f in missing if f != '<module>') or path} "
                 f"and wait for acceptance."
             )
         if any(covers(c, path) for c in held):
@@ -398,8 +398,8 @@ class Registry:
         expired = self.db.execute(
             "SELECT 1 FROM proposals WHERE ticket=? AND status='expired' LIMIT 1", (ticket,)
         ).fetchone()
-        hint = " Your earlier claim expired; run: claims renew" if expired else ""
-        return False, f"No accepted claim for {path} on {ticket}. Run: claims propose {path} and wait for acceptance.{hint}"
+        hint = " Your earlier claim expired; run: cbc renew" if expired else ""
+        return False, f"No accepted claim for {path} on {ticket}. Run: cbc propose {path} and wait for acceptance.{hint}"
 
     def export(self, ticket: str) -> dict:
         return {

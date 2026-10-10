@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "claim-before-code": {
+      "command": "python3",
+      "args": ["claim-before-code/cbc", "mcp"],
+      "env": { "CBC_HANDLE": "@your-handle" }
+    }
+  }
+}

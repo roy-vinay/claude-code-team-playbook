@@ -1,4 +1,4 @@
-"""A small claims registry for parallel coding agents.
+"""Claim Before Code: a small claims registry for parallel coding agents.
 
 Before an agent edits code, it claims what it will touch. Claims that overlap
 another ticket's claim, or code owned by someone else, are routed to that

@@ -1,4 +1,4 @@
-# Copy to .claims.toml at the root of your repo.
+# Copy to .cbc.toml at the root of your repo.
 
 # Who settles ownership disagreements and unanswered requests.
 coordinator = "@tech-lead"

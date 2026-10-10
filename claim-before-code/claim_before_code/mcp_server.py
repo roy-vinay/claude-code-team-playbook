@@ -15,7 +15,7 @@ PROTOCOL = "2025-06-18"
 
 TOOLS = [
     {
-        "name": "claims_propose",
+        "name": "cbc_propose",
         "description": (
             "Claim the folders, files, or hot-file functions you are about to change, BEFORE editing. "
             "If the result is 'pending', do not edit those targets; tell the user who was asked and wait."
@@ -32,29 +32,29 @@ TOOLS = [
         },
     },
     {
-        "name": "claims_status",
+        "name": "cbc_status",
         "description": "Show this ticket's claims, or every active claim if all=true.",
         "inputSchema": {"type": "object", "properties": {
             "ticket": {"type": "string"}, "all": {"type": "boolean"}}},
     },
     {
-        "name": "claims_check_file",
+        "name": "cbc_check_file",
         "description": "Check whether this ticket may edit a file (file-level check).",
         "inputSchema": {"type": "object", "properties": {
             "path": {"type": "string"}, "ticket": {"type": "string"}}, "required": ["path"]},
     },
     {
-        "name": "claims_renew",
+        "name": "cbc_renew",
         "description": "Extend the lease on this ticket's accepted claims.",
         "inputSchema": {"type": "object", "properties": {"ticket": {"type": "string"}}},
     },
     {
-        "name": "claims_release",
+        "name": "cbc_release",
         "description": "Release this ticket's claims once its work is merged or abandoned.",
         "inputSchema": {"type": "object", "properties": {"ticket": {"type": "string"}}},
     },
     {
-        "name": "claims_inbox",
+        "name": "cbc_inbox",
         "description": "List open requests waiting on a person (the code owner or coordinator).",
         "inputSchema": {"type": "object", "properties": {"handle": {"type": "string"}}},
     },
@@ -69,24 +69,24 @@ class Server:
     def _ticket(self, args: dict) -> str:
         t = args.get("ticket") or current_ticket(self.cfg)
         if not t:
-            raise ClaimError("no ticket: pass ticket, set CLAIMS_TICKET, or use a feat/<TICKET>-name branch")
+            raise ClaimError("no ticket: pass ticket, set CBC_TICKET, or use a feat/<TICKET>-name branch")
         return t
 
     def call(self, name: str, args: dict):
-        if name == "claims_propose":
+        if name == "cbc_propose":
             handle = current_handle(cwd=self.cfg.root)
             return self.reg.propose(self._ticket(args), handle, args["targets"], args.get("reason", "")).to_dict()
-        if name == "claims_status":
+        if name == "cbc_status":
             return self.reg.status(None if args.get("all") else self._ticket(args))
-        if name == "claims_check_file":
+        if name == "cbc_check_file":
             rel = self.cfg.relpath(args["path"]) or args["path"]
             ok, msg = self.reg.check_edit(self._ticket(args), rel, None)
             return {"allowed": ok, "message": msg}
-        if name == "claims_renew":
+        if name == "cbc_renew":
             return {"renewed": self.reg.renew(self._ticket(args))}
-        if name == "claims_release":
+        if name == "cbc_release":
             return {"released": self.reg.release(self._ticket(args))}
-        if name == "claims_inbox":
+        if name == "cbc_inbox":
             handle = args.get("handle") or current_handle(cwd=self.cfg.root)
             return self.reg.inbox(handle)
         raise ClaimError(f"unknown tool {name}")
@@ -99,7 +99,7 @@ class Server:
             result = {
                 "protocolVersion": msg.get("params", {}).get("protocolVersion", PROTOCOL),
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "claims", "version": __version__},
+                "serverInfo": {"name": "claim-before-code", "version": __version__},
             }
         elif method == "tools/list":
             result = {"tools": TOOLS}

@@ -2,9 +2,9 @@ import textwrap
 import unittest
 
 from helpers import CALCULATE  # noqa: F401  (sets sys.path)
-from agentclaims.codeowners import CodeOwners
-from agentclaims.functions import changed_functions
-from agentclaims.targets import MODULE, Target, covers, overlaps
+from claim_before_code.codeowners import CodeOwners
+from claim_before_code.functions import changed_functions
+from claim_before_code.targets import MODULE, Target, covers, overlaps
 
 
 class TargetTests(unittest.TestCase):

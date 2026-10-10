@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claim-before-code/cbc propose:*)",
+      "Bash(claim-before-code/cbc status:*)",
+      "Bash(claim-before-code/cbc renew:*)",
+      "Bash(claim-before-code/cbc export:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/claim-before-code/cbc hook" }
+        ]
+      }
+    ]
+  }
+}

@@ -112,9 +112,9 @@ Numbers will be added week by week, good or bad. They are operational notes from
 `check-owner.sh` works when one person splits the work. It doesn't help when each developer
 runs their own agents on their own tickets, and those agents reach into the same shared code.
 
-![claims demo: two agents, one shared file](claims/docs/claims-demo.gif)
+![Claim Before Code demo: two agents, one shared file](claim-before-code/docs/cbc-demo.gif)
 
-For that, see [`claims/`](claims/README.md): before an agent edits anything, it claims the folders,
+For that, see [Claim Before Code](claim-before-code/README.md): before an agent edits anything, it claims the folders,
 files, or hot-file functions it will change. Overlaps and code owned by someone else go to that
 owner as a request, not to a merge conflict. A hook blocks unclaimed edits, and a pull request
 check catches the rest. Companion to [When Your Team's Coding Agents Start Stepping on Each Other](https://vinayroy.substack.com/p/when-your-teams-coding-agents-start).
@@ -155,7 +155,7 @@ This playbook adds neither unless it earns its place.
 | `docs/parallel-builders.md` | Ten tactics for many builders without conflicts |
 | `docs/setup-notes.md` | Limits, messaging, cost, and when to stick with one session |
 | `scripts/check-owner.sh` | Hook that blocks edits outside a builder's folder |
-| `claims/` | Claims registry: agents claim code before editing, overlaps go to the owner |
+| `claim-before-code/` | Claim Before Code: agents claim code before editing, overlaps go to the owner |
 
 ## How to use it
 

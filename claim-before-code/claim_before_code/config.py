@@ -1,4 +1,4 @@
-"""Repo discovery and the .claims.toml config file."""
+"""Repo discovery and the .cbc.toml config file."""
 
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ class Config:
     def load(cls, root: str | os.PathLike | None = None) -> "Config":
         root = find_root(root)
         data = dict(DEFAULTS)
-        path = root / ".claims.toml"
+        path = root / ".cbc.toml"
         if path.exists():
             data.update(tomllib.loads(path.read_text()))
         known = {k: data[k] for k in DEFAULTS}
@@ -57,13 +57,13 @@ class Config:
     @property
     def db_path(self) -> Path:
         """One database per clone, shared by every worktree of that clone."""
-        env = os.environ.get("CLAIMS_DB")
+        env = os.environ.get("CBC_DB")
         if env:
             return Path(env)
         common = Path(_git(["rev-parse", "--git-common-dir"], self.root))
         if not common.is_absolute():
             common = (self.root / common).resolve()
-        return common / "claims.db"
+        return common / "cbc.db"
 
     def is_hot(self, path: str) -> bool:
         return any(fnmatch.fnmatchcase(path, pat) for pat in self.hot_files)
@@ -100,8 +100,8 @@ class Config:
 
 
 def current_ticket(cfg: Config, cwd: str | None = None) -> str | None:
-    """CLAIMS_TICKET wins; otherwise read it from the branch name."""
-    env = os.environ.get("CLAIMS_TICKET")
+    """CBC_TICKET wins; otherwise read it from the branch name."""
+    env = os.environ.get("CBC_TICKET")
     if env:
         return env
     try:
@@ -114,10 +114,10 @@ def current_ticket(cfg: Config, cwd: str | None = None) -> str | None:
 def current_handle(explicit: str | None = None, cwd: Path | None = None) -> str | None:
     if explicit:
         return explicit
-    env = os.environ.get("CLAIMS_HANDLE")
+    env = os.environ.get("CBC_HANDLE")
     if env:
         return env
     try:
-        return _git(["config", "claims.handle"], cwd or Path.cwd()) or None
+        return _git(["config", "cbc.handle"], cwd or Path.cwd()) or None
     except RuntimeError:
         return None
