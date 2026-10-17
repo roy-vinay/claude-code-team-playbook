@@ -1,4 +1,7 @@
-# Claude Code Team Playbook
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/masthead-dark.svg">
+  <img src=".github/assets/masthead-light.svg" width="100%" alt="Claude Code Team Playbook: AI made code cheap, review is now the scarce resource. By Vinay Roy.">
+</picture>
 
 **AI made code cheap. Review is now the scarce resource.**
 This playbook organizes coding agents around that one constraint.
