@@ -173,6 +173,16 @@ This playbook adds neither unless it earns its place.
 - Commands and settings follow the [Claude Code docs](https://code.claude.com/docs) at the time of writing. Check there if something doesn't work.
 - The hook assumes `npm`. Swap in your own lint and test commands.
 
+## About
+
+<a href="https://vinayroy.substack.com/p/more-claude-code-sessions-made-me"><picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/tile-article-dark.svg"><img src=".github/assets/tile-article-light.svg" width="32%" alt="More Claude Code Sessions Made Me Ship Less. Here's What Fixed It., on Substack"></picture></a>
+
+The article this playbook comes from.
+
+<a href="https://www.linkedin.com/in/royvinay"><picture><source media="(prefers-color-scheme: dark)" srcset=".github/assets/about-dark.svg"><img src=".github/assets/about-light.svg" width="100%" alt="About Vinay Roy: VP of Product at Burq.ai, leading Product and AI. Career from NVIDIA (2008), Qualcomm, Apple (Sidecar), Zeus Living, Vista, and a founding product role at an AI SaaS startup, to Burq.ai. Seven years as Head Instructor for the AI/ML executive program at UC Berkeley Executive Education. 3 US patents, MBA from Berkeley Haas, MS from IIT Roorkee."></picture></a>
+
+More projects and writing on [github.com/roy-vinay](https://github.com/roy-vinay).
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
