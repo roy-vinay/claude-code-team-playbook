@@ -186,3 +186,7 @@ More projects and writing on [github.com/roy-vinay](https://github.com/roy-vinay
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+---
+
+*Independent project; not affiliated with or endorsed by my employer. No proprietary code, data, or confidential information.*
