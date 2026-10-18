@@ -200,7 +200,7 @@ MIT. See [LICENSE](LICENSE).
 
 ---
 
-![Independent Project](https://img.shields.io/badge/Independent-Project-475569?style=flat)
+![🔒 Independent Project](https://img.shields.io/badge/%F0%9F%94%92%20Independent-Project-475569?style=flat)
 
 <sub><strong>Independently developed.</strong> Not affiliated with or endorsed by my employer.</sub><br>
 <sub><strong>Confidentiality:</strong> No proprietary code, data, or confidential information is included.</sub>
