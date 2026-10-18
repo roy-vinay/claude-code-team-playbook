@@ -3,6 +3,8 @@
   <img src=".github/assets/masthead-light.svg" width="100%" alt="Claude Code Team Playbook: AI made code cheap, review is now the scarce resource. By Vinay Roy.">
 </picture>
 
+<p>&nbsp;</p>
+
 **AI made code cheap. Review is now the scarce resource.**
 This playbook organizes coding agents around that one constraint.
 
